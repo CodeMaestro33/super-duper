@@ -1,34 +1,30 @@
-name: Automated Daily Commit
+name: Auto Run and Commit Every 25 Minutes
 
 on:
   schedule:
-    - cron: '*/20 * * * *' # Runs every 20 minutes
+    - cron: '*/25 * * * *' # Every 25 minutes
 
 jobs:
-  auto-commit:
+  auto-run-commit:
     runs-on: ubuntu-latest
+
     steps:
+      # Step 1: Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Git config
+      # Step 2: Run your script or commands
+      - name: Run your script
         run: |
-          git config --global user.name "Automated Commit Bot"
-          git config --global user.email "actions@github.com"
+          echo "Running scheduled task at $(date)"
+          # Add your custom script here, e.g., Python script or shell commands
+          # Example: python script.py
 
-      - name: Make changes (e.g., add a timestamp)
+      # Step 3: Commit and push changes
+      - name: Commit and push changes
         run: |
-          echo "Last updated: $(date)" >> timestamp.txt
-          git add timestamp.txt
-
-      - name: Commit changes
-        run: |
-          if [[ $(git status --porcelain) ]]; then # Check if there are changes to commit
-            git commit -m "Automated update - $(date)"
-          fi
-
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }} # Push to the branch that triggered the workflow
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Automated commit at $(date)"
+          git push

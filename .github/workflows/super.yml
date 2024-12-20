@@ -3,6 +3,7 @@ name: Auto Run and Commit Every 25 Minutes
 on:
   schedule:
     - cron: '*/25 * * * *' # Every 25 minutes
+  workflow_dispatch: # Allow manual trigger
 
 jobs:
   auto-run-commit:

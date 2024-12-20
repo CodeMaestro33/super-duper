@@ -1,37 +1,38 @@
 name: Auto Run and Commit Every 25 Minutes
 
 on:
-  workflow_dispatch: # Allows manual trigger
-  schedule:
-    - cron: '*/25 * * * *' # Runs every 25 minutes
+  workflow_dispatch: # Manual trigger
+  schedule: # Scheduled trigger
+    - cron: "*/25 * * * *" # Runs every 25 minutes
 
 jobs:
   auto-run-commit:
     runs-on: ubuntu-latest
+
     steps:
-      # Step 1: Checkout repository
+      # Step 1: Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 2: Set up Git config
-      - name: Set up Git config
+      # Step 2: Configure Git
+      - name: Configure Git
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "actions@github.com"
 
-      # Step 3: Make changes (e.g., add a timestamp)
-      - name: Add timestamp to file
+      # Step 3: Make changes to a file (force a change)
+      - name: Add timestamp to force changes
         run: |
-          echo "Last updated: $(date)" >> timestamp.txt
-          git add timestamp.txt
+          echo "Updated at: $(date)" >> timestamp.log
+          git add timestamp.log
 
-      # Step 4: Commit changes
+      # Step 4: Commit changes (allow empty commit to avoid errors)
       - name: Commit changes
         run: |
-          git commit -m "Automated update - $(date)" || echo "No changes to commit"
+          git commit -m "Automated update - $(date)" || echo "Nothing to commit, skipping"
 
       # Step 5: Push changes
       - name: Push changes
-        uses: ad-m/github-push-action@master
+        uses: ad-m/github-push-action@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

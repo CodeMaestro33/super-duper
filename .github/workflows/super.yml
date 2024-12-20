@@ -1,6 +1,7 @@
 name: Auto Run and Commit Every 25 Minutes
 
 on:
+  workflow_dispatch: # Allows manual trigger
   schedule:
     - cron: '*/25 * * * *' # Runs every 25 minutes
 

@@ -1,3 +1,5 @@
+name: Maintain GitHub longlegs
+
 on:
   schedule:
     - cron: '*/15 * * * *' # Runs every 15 minutes
@@ -7,27 +9,24 @@ jobs:
   update-readme:
     runs-on: ubuntu-latest
     steps:
+      # Step 1: Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # Step 2: Set up Git config
       - name: Set up Git config
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "actions@github.com"
 
-      - name: Check for changes
-        id: check_changes
-        run: |
-          git status --porcelain
-
-      - name: Update README (if changes detected)
-        if: steps.check_changes.outputs == ''
+      # Step 3: Make changes to README.md
+      - name: Update README
         run: |
           echo "Last updated on: $(date)" >> README.md
-          echo "This README is automatically updated with changes." >> README.md
 
-      - name: Commit and push changes (if changes detected)
-        if: steps.check_changes.outputs == ''
+      # Step 4: Commit and push changes
+      - name: Commit and push changes
         run: |
-          git commit -m "Updated README with date and time"
+          git add README.md
+          git commit -m "Automated update: $(date)"
           git push

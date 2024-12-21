@@ -1,14 +1,10 @@
-name: Automated Commit Every 15 Minutes
-
 on:
   schedule:
-    - cron: '*/15 * * * *'
-  workflow_dispatch: # Add this to enable manual triggering
-
-# ... (rest of your workflow code)
+    - cron: '*/15 * * * *' # Runs every 15 minutes
+  workflow_dispatch: # Allows manual triggering
 
 jobs:
-  auto-commit:
+  update-readme:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -19,19 +15,19 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "actions@github.com"
 
-      - name: Make changes (add timestamp)
+      - name: Check for changes
+        id: check_changes
         run: |
-          echo "Last updated: $(date)" >> timestamp.txt
-          git add timestamp.txt
+          git status --porcelain
 
-      - name: Commit changes (only if there are changes)
+      - name: Update README (if changes detected)
+        if: steps.check_changes.outputs == ''
         run: |
-          if [[ $(git status --porcelain) ]]; then
-            git commit -m "Automated update - $(date)"
-          fi
+          echo "Last updated on: $(date)" >> README.md
+          echo "This README is automatically updated with changes." >> README.md
 
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }} # Push to the branch that triggered the workflow
+      - name: Commit and push changes (if changes detected)
+        if: steps.check_changes.outputs == ''
+        run: |
+          git commit -m "Updated README with date and time"
+          git push

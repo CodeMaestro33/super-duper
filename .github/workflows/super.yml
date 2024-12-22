@@ -1,32 +1,18 @@
-name: Maintain GitHub longlegs
+name: Scheduled Health Check
 
+# Controls when the action will run.
 on:
   schedule:
-    - cron: '*/15 * * * *' # Runs every 15 minutes
-  workflow_dispatch: # Allows manual triggering
+    - cron: "0,15,30,45 * * * *"
 
 jobs:
-  update-readme:
+  health_check_job:
     runs-on: ubuntu-latest
+    name: Check all sites
     steps:
-      # Step 1: Checkout the repository
-      - name: Checkout repository
+      - name: Checkout Code
         uses: actions/checkout@v3
-
-      # Step 2: Set up Git config
-      - name: Set up Git config
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "actions@github.com"
-
-      # Step 3: Make changes to README.md
-      - name: Update README
-        run: |
-          echo "Last updated on: $(date)" >> README.md
-
-      # Step 4: Commit and push changes
-      - name: Commit and push changes
-        run: |
-          git add README.md
-          git commit -m "Automated update: $(date)"
-          git push
+        
+      - name: Run Shell Script
+        id: shell_script_run
+        run: bash ./health-check.sh

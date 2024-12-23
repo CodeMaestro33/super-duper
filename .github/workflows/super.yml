@@ -35,14 +35,24 @@ jobs:
 #!/bin/bash
 
 # Get the current date in YYYY-MM-DD format
-today=<span class="math-inline">\(date \+'%Y\-%m\-%d'\)
-\# Check if a log entry already exists for today
-if grep \-q "^</span>{today}:" log.txt; then
+#!/bin/bash
+
+today=$(date +'%Y-%m-%d')
+
+if grep -q "^${today}:" log.txt; then
   echo "Log entry already exists for today. Skipping commit."
   exit 0
 fi
 
-# Append a new log entry with the date and timestamp
+echo "${today}: Last updated: $(date)" >> log.txt
+git add log.txt
+
+if git diff --cached --quiet log.txt; then
+  echo "No changes to commit."
+  exit 0
+else
+  git commit -m "Automated update for ${today}"
+fi
 echo "${today}: Last updated: $(date)" >> log.txt
 
 # Add the log file to Git staging

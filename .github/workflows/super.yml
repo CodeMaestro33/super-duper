@@ -1,64 +1,31 @@
-name: Daily Contributions Every 15 Minutes
+name: Commit Changes Every 15 Minutes
 
 on:
   schedule:
-    - cron: '*/15 * * * *' # Runs every 15 minutes
-  workflow_dispatch: # Allow manual triggering
+    - cron: "*/15 * * * *" # Runs every 15 minutes
 
 jobs:
-  contribute:
+  commit-changes:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Set up Git Config
+      - name: Make Changes
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "actions@github.com"
+          echo "Updated at $(date)" >> updates.log
 
-      - name: Update Log File (using dedicated script)
+      - name: Configure Git
         run: |
-          ./update_log.sh
+          git config user.name "Your GitHub Username"
+          git config user.email "your-email@example.com"
 
-      - name: Push Changes (if commits were made)
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.MY_PAT }} # Use your actual secret name here
-        # Only push if there are changes
-        if: ${{ github.event.name == 'push' || success() }}  
+      - name: Commit Changes
+        run: |
+          git add .
+          git commit -m "Auto-update: $(date)" || echo "Nothing to commit"
 
-**update_log.sh (example script):**
-
-```sh
-#!/bin/bash
-
-# Get the current date in YYYY-MM-DD format
-#!/bin/bash
-
-today=$(date +'%Y-%m-%d')
-
-if grep -q "^${today}:" log.txt; then
-  echo "Log entry already exists for today. Skipping commit."
-  exit 0
-fi
-
-echo "${today}: Last updated: $(date)" >> log.txt
-git add log.txt
-
-if git diff --cached --quiet log.txt; then
-  echo "No changes to commit."
-  exit 0
-else
-  git commit -m "Automated update for ${today}"
-fi
-echo "${today}: Last updated: $(date)" >> log.txt
-
-# Add the log file to Git staging
-git add log.txt
-
-# Commit changes only if there were any additions
-if git status --porcelain | grep -q '^A'; then
-  git commit -m "Automated update for ${today}"
-fi
+      - name: Push Changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: git push origin main
